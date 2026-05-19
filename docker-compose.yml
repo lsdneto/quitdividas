@@ -1,0 +1,40 @@
+version: '3.9'
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: quitdividas-db
+    environment:
+      POSTGRES_DB: quitdividas
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+    container_name: quitdividas-backend
+    depends_on:
+      - db
+    environment:
+      PORT: 3001
+      JWT_SECRET: troque-esta-chave
+      DATABASE_URL: postgres://postgres:postgres@db:5432/quitdividas
+    ports:
+      - '3001:3001'
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: quitdividas-frontend
+    depends_on:
+      - backend
+    environment:
+      VITE_API_URL: http://localhost:3001/api
+    ports:
+      - '5173:5173'
+
+volumes:
+  postgres_data:
